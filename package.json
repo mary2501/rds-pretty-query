@@ -1,0 +1,17 @@
+{
+  "name": "rds-pretty-query",
+  "version": "1.0.0",
+  "description": "Rds query prettier",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "rds-pretty-query": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test test/index.test.js"
+  },
+  "author": "Maria Grazia Patteri",
+  "license": "MIT",
+  "devDependencies": {
+  }
+}
