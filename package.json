@@ -1,6 +1,6 @@
 {
   "name": "rds-pretty-query",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rds query prettier",
   "type": "module",
   "main": "src/index.js",
@@ -13,5 +13,9 @@
   "author": "Maria Grazia Patteri",
   "license": "MIT",
   "devDependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mary2501/rds-pretty-query.git"
   }
 }
