@@ -118,4 +118,7 @@ Contributions are welcome! If you find a bug or have a suggestion for improving 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+
+[![npm version](https://img.shields.io/npm/v/rds-pretty-query.svg)](https://www.npmjs.com/package/rds-pretty-query)
+
 ---
