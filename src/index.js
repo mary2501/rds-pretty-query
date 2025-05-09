@@ -3,6 +3,7 @@
 import { spawn as originalSpawn } from 'child_process';
 import { fileURLToPath } from 'url'; // Needed to get the script's file path in ESM
 import path from 'path';
+import { realpathSync } from 'fs';
 
 // Get the equivalent of __filename in ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -149,7 +150,11 @@ export function displayResults(output) {
 // (not when it is imported as a module in the tests)
 
 // Detect if this file is being run directly as a script
-const isRunningDirectly = process.argv[1] === fileURLToPath(import.meta.url);
+const realArgv = realpathSync(process.argv[1] ?? '');
+const realCurrent = realpathSync(fileURLToPath(import.meta.url));
+
+const isRunningDirectly = realArgv === realCurrent;
+
 
 if (isRunningDirectly) {
     // Get the arguments passed from the command line
