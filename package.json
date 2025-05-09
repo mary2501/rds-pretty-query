@@ -1,6 +1,6 @@
 {
   "name": "rds-pretty-query",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Rds query prettier",
   "type": "module",
   "main": "src/index.js",
