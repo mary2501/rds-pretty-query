@@ -58,11 +58,6 @@ beforeEach(() => {
   mockChildProcessInstance = new EventEmitter();
   mockChildProcessInstance.stdout = new EventEmitter();
   mockChildProcessInstance.stderr = new EventEmitter();
-
-  // We DO NOT need to mock console.log, console.error, or process.exit here
-  // because the function being tested (executeAwsStatement) does not call them directly.
-  // It returns a Promise that resolves with results/messages or rejects with errors.
-  // The test asserts the Promise's outcome, not side effects like logging or exiting.
 });
 
 afterEach(() => {
@@ -76,19 +71,13 @@ test('should call spawn with correct arguments including --include-result-metada
   const args = ['--resource-arn', 'arn:aws:rds:us-east-1:123456789012:cluster:my-db', '--secret-arn', 'arn:aws:secretsmanager:us-east-1:123456789012:secret:my-secret', '--database', 'mydatabase', '--sql', 'SELECT 1'];
 
   // Call the refactored function, injecting the mock spawn function
-  // We don't need to wait for a timeout after this call, as the function's logic
-  // is synchronous until the 'close' or 'error' event is emitted on the mock instance.
   const executionPromise = executeAwsStatement(mockSpawn, args);
 
-
   // Simulate the AWS CLI process closing successfully immediately after spawn is called
-  // This will trigger the 'close' event handler inside executeAwsStatement,
-  // which will attempt to parse output (which is empty initially) and resolve the promise.
   mockChildProcessInstance.emit('close', 0);
 
   // Wait for the promise returned by executeAwsStatement to resolve
   await executionPromise;
-
 
   // Assert that the mock spawn was called exactly once with the expected command and arguments
   assert.strictEqual(mockSpawnCalls.length, 1, 'spawn should have been called exactly once');
@@ -100,8 +89,6 @@ test('should call spawn with correct arguments including --include-result-metada
     '--include-result-metadata',
     ...args // Ensure all user arguments were passed through
   ], `Spawn arguments mismatch.`);
-
-  // No assertions needed for console.log/error or process.exit here, as the tested function doesn't call them.
 });
 
 test('should resolve with results for a successful SELECT with records', async () => {

@@ -2,9 +2,11 @@
 
 import { spawn as originalSpawn } from 'child_process';
 import { fileURLToPath } from 'url'; // Needed to get the script's file path in ESM
+import path from 'path';
 
 // Get the equivalent of __filename in ES Modules
 const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Executes an AWS RDS Data API execute-statement command using the AWS CLI.
@@ -90,68 +92,79 @@ export async function executeAwsStatement(spawnFunc, args) {
     });
 }
 
-// --- Entry Point for Command Line Execution ---
-// This block runs only when the script is executed directly (e.g., node src/index.js)
-// It handles command line arguments, calls the core logic, and manages process exit/output.
-// Get the arguments passed from the command line
-const commandLineArgs = process.argv.slice(2);
+/**
+ * Function to format and display query results in a pretty table
+ * @param {object} output - The output object from executeAwsStatement
+ */
+export function displayResults(output) {
+    if (output.results) {
+        // --- Output Formatting Logic ---
+        const result = output.results;
+        const columnNames = result.columnMetadata ? result.columnMetadata.map(col => col.name) : [];
+        const rows = result.records.map(row =>
+            row.map(cell => {
+                const value = Object.values(cell)[0];
+                return value === null ? null : value;
+            })
+        );
 
-// Call the core logic function, injecting the real spawn function
-executeAwsStatement(originalSpawn, commandLineArgs)
-    .then(output => {
-        // Handle successful execution output
-        if (output.results) {
-            // --- Output Formatting Logic (can be extracted to a helper if complex) ---
-            // This part is primarily for presenting results to the user via CLI
-            const result = output.results;
-            const columnNames = result.columnMetadata ? result.columnMetadata.map(col => col.name) : [];
-            const rows = result.records.map(row =>
-                row.map(cell => {
-                    const value = Object.values(cell)[0];
-                    return value === null ? null : value;
-                })
-            );
+        // Print the number of records (rows)
+        console.log(`\n📊 Results (${rows.length}):\n`);
 
-            // Print the number of records (rows)
-            console.log(`\n📊 Results (${rows.length}):\n`);
+        const colWidths = [];
+        const dataToMeasure = columnNames.length > 0 ? [columnNames, ...rows] : rows;
 
-            const colWidths = [];
-            const dataToMeasure = columnNames.length > 0 ? [columnNames, ...rows] : rows;
-
-            for (const row of dataToMeasure) {
-                row.forEach((val, i) => {
-                    const len = String(val ?? '').length;
-                    colWidths[i] = Math.max(colWidths[i] || 0, len);
-                });
-            }
-
-            if (columnNames.length > 0) {
-                const headerLine = columnNames
-                    .map((name, i) => String(name ?? '').padEnd(colWidths[i]))
-                    .join(' | ');
-                console.log('  ', headerLine);
-
-                console.log('  ', colWidths.map(w => '-'.repeat(w)).join(' | '));
-            }
-
-            rows.forEach(row => {
-                const line = row
-                    .map((val, i) => String(val ?? '').padEnd(colWidths[i]))
-                    .join(' | ');
-                console.log('•', line);
+        for (const row of dataToMeasure) {
+            row.forEach((val, i) => {
+                const len = String(val ?? '').length;
+                colWidths[i] = Math.max(colWidths[i] || 0, len);
             });
-            // --- End Output Formatting Logic ---
-
-        } else {
-            // Print success message for commands without standard results
-            console.log(output.message);
         }
-        process.exit(0); // Exit with success code
-    })
-    .catch(error => {
-        // Handle errors by printing to console.error and exiting with a non-zero code
-        console.error(`❌ ${error.message}`);
-        process.exit(1); // Exit with a generic error code for simplicity
-        // Could parse error.message to determine a more specific exit code if needed
-    });
 
+        if (columnNames.length > 0) {
+            const headerLine = columnNames
+                .map((name, i) => String(name ?? '').padEnd(colWidths[i]))
+                .join(' | ');
+            console.log('  ', headerLine);
+
+            console.log('  ', colWidths.map(w => '-'.repeat(w)).join(' | '));
+        }
+
+        rows.forEach(row => {
+            const line = row
+                .map((val, i) => String(val ?? '').padEnd(colWidths[i]))
+                .join(' | ');
+            console.log('•', line);
+        });
+        // --- End Output Formatting Logic ---
+
+    } else {
+        // Print success message for commands without standard results
+        console.log(output.message);
+    }
+}
+
+// --- Entry Point for Command Line Execution ---
+// The following code will be executed only when the script is run directly from the command line
+// (not when it is imported as a module in the tests)
+
+// Detect if this file is being run directly as a script
+const isRunningDirectly = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isRunningDirectly) {
+    // Get the arguments passed from the command line
+    const commandLineArgs = process.argv.slice(2);
+
+    // Call the core logic function, injecting the real spawn function
+    executeAwsStatement(originalSpawn, commandLineArgs)
+        .then(output => {
+            // Display results using our formatter function
+            displayResults(output);
+            process.exit(0); // Exit with success code
+        })
+        .catch(error => {
+            // Handle errors by printing to console.error and exiting with a non-zero code
+            console.error(`❌ ${error.message}`);
+            process.exit(1); // Exit with a generic error code for simplicity
+        });
+}
