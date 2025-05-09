@@ -1,6 +1,6 @@
 {
   "name": "rds-pretty-query",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Rds query prettier",
   "type": "module",
   "main": "src/index.js",
@@ -12,7 +12,7 @@
   },
   "author": {
     "name": "Maria Grazia Patteri",
-    "email": "mgpatteri2501@gmail.com"
+    "url": "https://www.linkedin.com/in/maria-grazia-patteri-13bb6161/"
   },
   "license": "MIT",
   "devDependencies": {
@@ -20,5 +20,23 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mary2501/rds-pretty-query.git"
-  }
+  },
+  "keywords": [
+    "rds",
+    "aws",
+    "sql",
+    "query",
+    "formatter",
+    "pretty",
+    "logging",
+    "debugging",
+    "database",
+    "postgresql",
+    "mysql",
+    "sql-query",
+    "log-parser",
+    "rds-logs",
+    "nodejs",
+    "npm"
+  ]
 }
